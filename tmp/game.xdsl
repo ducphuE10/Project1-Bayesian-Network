@@ -1,0 +1,65 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- This network was created in GeNIe Academic, which can be used for academic teaching and research purposes only -->
+<smile version="1.0" id="Network1" numsamples="10000" discsamples="10000">
+	<nodes>
+		<cpt id="TM">
+			<state id="stupid" />
+			<state id="normal" />
+			<state id="skilled" />
+			<probabilities>0.5 0.3 0.2</probabilities>
+		</cpt>
+		<cpt id="wifi">
+			<state id="low" />
+			<state id="normal" />
+			<state id="fast" />
+			<probabilities>0.2 0.6 0.2</probabilities>
+		</cpt>
+		<cpt id="feeling">
+			<state id="True" />
+			<state id="False" />
+			<probabilities>0.6 0.4</probabilities>
+		</cpt>
+		<cpt id="win">
+			<state id="True" />
+			<state id="False" />
+			<parents>TM wifi feeling</parents>
+			<probabilities>0.1 0.9 0 1 0.5 0.5 0.5 0.5 0.5 0.5 0.5 0.5 0.5 0.5 0.5 0.5 0.5 0.5 0.5 0.5 0.5 0.5 0.5 0.5 0.5 0.5 0.5 0.5 0.5 0.5 0.5 0.5 1 0 0.6 0.4</probabilities>
+		</cpt>
+	</nodes>
+	<extensions>
+		<genie version="1.0" app="GeNIe 3.0.6518.0 ACADEMIC" name="Network1">
+			<node id="win">
+				<name>Win game</name>
+				<interior color="e5f6f7" />
+				<outline color="000080" />
+				<font color="000000" name="Arial" size="8" />
+				<position>638 452 760 515</position>
+				<barchart active="true" width="128" height="64" />
+			</node>
+			<node id="TM">
+				<name>Team mate</name>
+				<interior color="e5f6f7" />
+				<outline color="000080" />
+				<font color="000000" name="Arial" size="8" />
+				<position>441 253 545 326</position>
+				<barchart active="true" width="128" height="72" />
+			</node>
+			<node id="wifi">
+				<name>Wifi connect</name>
+				<interior color="e5f6f7" />
+				<outline color="000080" />
+				<font color="000000" name="Arial" size="8" />
+				<position>787 267 903 339</position>
+				<barchart active="true" width="128" height="72" />
+			</node>
+			<node id="feeling">
+				<name>Feeling Good</name>
+				<interior color="e5f6f7" />
+				<outline color="000080" />
+				<font color="000000" name="Arial" size="8" />
+				<position>1021 265 1140 335</position>
+				<barchart active="true" />
+			</node>
+		</genie>
+	</extensions>
+</smile>

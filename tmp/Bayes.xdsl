@@ -1,0 +1,191 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- This network was created in GeNIe Academic, which can be used for academic teaching and research purposes only -->
+<smile version="1.0" id="Network1" numsamples="10000" discsamples="10000">
+	<functions>
+		<function>tang(x)=Sin(x)/Cos(x)</function>
+	</functions>
+	<nodes>
+		<cpt id="GA">
+			<state id="State0" />
+			<state id="State1" />
+			<probabilities>0.05 0.95</probabilities>
+		</cpt>
+		<cpt id="BFA">
+			<state id="State0" />
+			<state id="State1" />
+			<probabilities>0.03 0.97</probabilities>
+		</cpt>
+		<cpt id="PTF">
+			<state id="True" />
+			<state id="False" />
+			<probabilities>0 1</probabilities>
+		</cpt>
+		<cpt id="EF">
+			<state id="True" />
+			<state id="False" />
+			<probabilities>0.1 0.9</probabilities>
+		</cpt>
+		<cpt id="DF">
+			<state id="True" />
+			<state id="False" />
+			<parents>EF</parents>
+			<probabilities>0.05 0.95 0 1</probabilities>
+		</cpt>
+		<equation id="FS">
+			<parents>PTF DF</parents>
+			<definition>FS=Or(PTF,DF)</definition>
+			<discretization>
+				<interval label="State0" upper="0" />
+				<interval label="State1" upper="1" />
+			</discretization>
+		</equation>
+		<cpt id="CS">
+			<state id="State0" />
+			<state id="State1" />
+			<probabilities>0.15 0.85</probabilities>
+		</cpt>
+		<cpt id="SI">
+			<state id="State0" />
+			<state id="State1" />
+			<probabilities>0.02 0.98</probabilities>
+		</cpt>
+		<cpt id="CF">
+			<state id="State0" />
+			<state id="State1" />
+			<probabilities>0.01 0.99</probabilities>
+		</cpt>
+		<cpt id="CSRF">
+			<state id="State0" />
+			<state id="State1" />
+			<probabilities>0.12 0.88</probabilities>
+		</cpt>
+		<cpt id="KL">
+			<state id="State0" />
+			<state id="State1" />
+			<probabilities>0.05 0.95</probabilities>
+		</cpt>
+		<cpt id="SE">
+			<state id="State0" />
+			<state id="State1" />
+			<probabilities>0.2 0.8</probabilities>
+		</cpt>
+		<equation id="FU">
+			<parents>SI CF CSRF KL SE</parents>
+			<definition>FU=Or(SI,CF,CSRF,KL,SE)</definition>
+			<discretization>
+				<interval label="State0" upper="0" />
+				<interval label="State1" upper="1" />
+			</discretization>
+		</equation>
+		<equation id="OUP">
+			<parents>GA BFA FS CS FU</parents>
+			<definition>OUP=Or(GA,BFA,FS,CS,FU)</definition>
+			<discretization>
+				<interval label="State0" upper="0" />
+				<interval label="State1" upper="1" />
+			</discretization>
+		</equation>
+	</nodes>
+	<extensions>
+		<genie version="1.0" app="GeNIe 3.0.6518.0 ACADEMIC" name="Network1">
+			<node id="OUP">
+				<name>Obtaining Username &amp; Password</name>
+				<interior color="e5f6f7" />
+				<outline color="000080" />
+				<font color="000000" name="Arial" size="8" />
+				<position>484 453 583 514</position>
+			</node>
+			<node id="GA">
+				<name>Guessing Attack</name>
+				<interior color="e5f6f7" />
+				<outline color="000080" />
+				<font color="000000" name="Arial" size="8" />
+				<position>472 338 607 403</position>
+			</node>
+			<node id="BFA">
+				<name>Brute Force Attack</name>
+				<interior color="e5f6f7" />
+				<outline color="000080" />
+				<font color="000000" name="Arial" size="8" />
+				<position>671 344 805 413</position>
+			</node>
+			<node id="FS">
+				<name>From System</name>
+				<interior color="e5f6f7" />
+				<outline color="000080" />
+				<font color="000000" name="Arial" size="8" />
+				<position>87 343 219 408</position>
+			</node>
+			<node id="FU">
+				<name>From User</name>
+				<interior color="e5f6f7" />
+				<outline color="000080" />
+				<font color="000000" name="Arial" size="8" />
+				<position>904 356 1028 418</position>
+			</node>
+			<node id="SI">
+				<name>Stolen Information</name>
+				<interior color="e5f6f7" />
+				<outline color="000080" />
+				<font color="000000" name="Arial" size="8" />
+				<position>446 74 559 141</position>
+			</node>
+			<node id="CF">
+				<name>Coersive Force</name>
+				<interior color="e5f6f7" />
+				<outline color="000080" />
+				<font color="000000" name="Arial" size="8" />
+				<position>579 68 688 133</position>
+			</node>
+			<node id="CSRF">
+				<name>Cross-Site Request Forgery</name>
+				<interior color="e5f6f7" />
+				<outline color="000080" />
+				<font color="000000" name="Arial" size="8" />
+				<position>712 65 819 128</position>
+			</node>
+			<node id="KL">
+				<name>Key Logger</name>
+				<interior color="e5f6f7" />
+				<outline color="000080" />
+				<font color="000000" name="Arial" size="8" />
+				<position>839 59 946 127</position>
+			</node>
+			<node id="SE">
+				<name>Social Engineering</name>
+				<interior color="e5f6f7" />
+				<outline color="000080" />
+				<font color="000000" name="Arial" size="8" />
+				<position>973 60 1072 121</position>
+			</node>
+			<node id="CS">
+				<name>Credential Stuffing</name>
+				<interior color="e5f6f7" />
+				<outline color="000080" />
+				<font color="000000" name="Arial" size="8" />
+				<position>281 338 414 408</position>
+			</node>
+			<node id="PTF">
+				<name>Plaint Text File</name>
+				<interior color="e5f6f7" />
+				<outline color="000080" />
+				<font color="000000" name="Arial" size="8" />
+				<position>18 204 134 272</position>
+			</node>
+			<node id="DF">
+				<name>File is Decrypted</name>
+				<interior color="e5f6f7" />
+				<outline color="000080" />
+				<font color="000000" name="Arial" size="8" />
+				<position>184 203 310 272</position>
+			</node>
+			<node id="EF">
+				<name>Encrypted File</name>
+				<interior color="e5f6f7" />
+				<outline color="000080" />
+				<font color="000000" name="Arial" size="8" />
+				<position>164 73 290 143</position>
+			</node>
+		</genie>
+	</extensions>
+</smile>
