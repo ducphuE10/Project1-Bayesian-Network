@@ -14,22 +14,23 @@ class Network:
     def help_generate_NPT(self, list_nodes, path_to_forder=None):
         for node in list_nodes:
             if node not in self.list_nodes :
-                print("Error: node ",node.name," not in network")
+                print("Error: node ", node.id_name, " not in network")
                 raise Exception
 
 
         for node in list_nodes:
             par = node.get_parent()
-            columns = [i.name for i in par] + [node.name, "cond_prob"]
+            columns = [i.id_name for i in par] + [node.id_name, "cond_prob"]
             states = [i.states for i in par] + [node.states] + [[0]]
             map_states = list(itertools.product(*states))
             df = pd.DataFrame(map_states, columns=columns)
             if path_to_forder is not None:
-                zero_NPT_path = path_to_forder + '/' + node.name + '.csv'
+                zero_NPT_path = path_to_forder + '/' + node.id_name + '.csv'
                 df.to_csv(zero_NPT_path)
-                print("base NPT node of " + node.name + " is stored in: " + zero_NPT_path)
+                print("base NPT node of " + node.id_name + " is stored in: " + zero_NPT_path)
             else:
                 return df
+
     def set_NPT_from_csv(self, node: Node, path):
         if node not in self.graph.list_nodes:
             print("Node is not available in network")
@@ -39,7 +40,6 @@ class Network:
     def set_NPT_func(self, func_node: Node):
         if func_node in self.list_nodes:
             func_node.set_NPT_func()
-
 
     def set_NPT(self, node: Node, NPT):
         '''
@@ -57,40 +57,42 @@ class Network:
         '''
         if node not in self.graph.list_nodes:
             print("Node is not available in network")
-
         else:
-            columns = [i.name for i in node.get_parent()] + [node.name, "cond_prob"]
+            columns = [i.id_name for i in node.get_parent()] + [node.id_name, "cond_prob"]
             node.NPT = NPT[columns]
 
     def set_evidence(self, evidence: dict):
+        for node in evidence.keys():
+            if node not in self.list_nodes:
+                raise Exception
         print("******************************")
-        print("set evidence", {i.name: j for i, j in evidence.items()})
+        print("set evidence", {i.id_name: j for i, j in evidence.items()})
         for node in self.list_nodes:
             if node not in evidence.keys():
                 table = PrettyTable(['state', 'prob'])
                 for state in node.states:
                     table.add_row([state, self.conditional_probability({node: state}, evidence)])
-                print("Table of node: ", node.name)
+                print("Table of node: ", node.id_name)
                 print(table)
-
         print("******************************\n")
 
     def full_marginal(self, observation: dict):
         assert self.num_nodes == len(observation)
         result = 1
+        for node in observation.keys():
+            if node not in self.list_nodes:
+                raise Exception
+
         for node in self.graph.list_nodes:
             # if node.name == 'node4':
             par = node.get_parent()
             npt = node.NPT
             node_value = observation[node]
-            npt = npt[npt[node.name] == node_value]
+            npt = npt[npt[node.id_name] == node_value]
             for p in par:
                 node_value = observation[p]
-                npt = npt[npt[p.name] == node_value]
-                # break
+                npt = npt[npt[p.id_name] == node_value]
 
-                # print(npt)
-            # print(npt['cond_prob'])
             result *= npt['cond_prob'].values.item()
 
         return round(result, 3)
@@ -100,7 +102,7 @@ class Network:
             print("Invalid input")
         else:
             result = 0
-            list_observation = []
+
             hidden_nodes = [i for i in self.graph.list_nodes if i not in observation]
             # print(hidden_nodes)
             list_hidden_node_states = []
@@ -130,6 +132,6 @@ class Network:
             table = PrettyTable(['state', 'prob'])
             for state in node.states:
                 table.add_row([state, self.marginal_probability({node: state})])
-            print("Table of node: ", node.name)
+            print("Table of node: ", node.id_name)
             print(table)
         print("******************************\n")

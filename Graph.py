@@ -10,13 +10,13 @@ class Graph:
     def add_nodes(self, *nodes):
         self.list_nodes.extend(nodes)
         self.num_nodes += len(nodes)
-    def remove_node(self, ):
+    def remove_node(self, *nodes):
         pass
 
     def add_edges(self, *list_edge):
         for pair_node in list_edge:
             node1,node2 = pair_node
-            self.graph.append((node1.name,node2.name))
+            self.graph.append((node1.id_name, node2.id_name))
             node2.num_parent += 1
             node2.add_parent(node1)
 
