@@ -1,0 +1,31 @@
+,node1,node3,node2,cond_prob
+0,True,very low,football,0
+1,True,very low,tennis,0
+2,True,very low,volley ball,0
+3,True,low,football,0
+4,True,low,tennis,0
+5,True,low,volley ball,0
+6,True,medium,football,0
+7,True,medium,tennis,0
+8,True,medium,volley ball,0
+9,True,high,football,0
+10,True,high,tennis,0
+11,True,high,volley ball,0
+12,True,very high,football,0
+13,True,very high,tennis,0
+14,True,very high,volley ball,0
+15,False,very low,football,0
+16,False,very low,tennis,0
+17,False,very low,volley ball,0
+18,False,low,football,0
+19,False,low,tennis,0
+20,False,low,volley ball,0
+21,False,medium,football,0
+22,False,medium,tennis,0
+23,False,medium,volley ball,0
+24,False,high,football,0
+25,False,high,tennis,0
+26,False,high,volley ball,0
+27,False,very high,football,0
+28,False,very high,tennis,0
+29,False,very high,volley ball,0

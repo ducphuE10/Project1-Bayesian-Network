@@ -14,8 +14,13 @@ class Graph:
         pass
 
     def add_edges(self, *list_edge):
+        print(self.list_nodes)
         for pair_node in list_edge:
             node1,node2 = pair_node
+            if node1 not in self.list_nodes or node2 not in self.list_nodes:
+                print('ditme')
+                # raise Exception
+                pass
             self.graph.append((node1.id_name, node2.id_name))
             node2.num_parent += 1
             node2.add_parent(node1)

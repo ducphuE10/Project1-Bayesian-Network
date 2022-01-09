@@ -58,12 +58,14 @@ class OR_Node(Boolean_Node):
                 raise Exception
 
         par = self.get_parent()
+
         columns = [i.id_name for i in par] + [self.id_name, "cond_prob"]
         states = [i.states for i in par] + [self.states] + [[0]]
         map_states = list(itertools.product(*states))
+        # print(map_states)
         baseNPT = [list(record) for record in map_states]
         for record in baseNPT:
-            if (True in record[:-2] and record[-2] == True) or (False in record[:-2] and record[-2] == False):
+            if (True in record[:-2] and record[-2] == True) or (True not in record[:-2] and record[-2] == False):
                 record[-1] = 1
         self.NPT = pd.DataFrame(baseNPT, columns=columns)
 
@@ -129,7 +131,8 @@ class Ranked_Node(Node):
         self.map = dict(zip(self.states,self.numeric_states[:-1]))
 
 
-    def set_NPT_TNormal(self):
+    def set_NPT_func(self):
+
         y = []
         for i in range(len(self.numeric_states) - 1):
             y.append(self.gaussian.cdf(self.numeric_states[i + 1]) - self.gaussian.cdf(self.numeric_states[i]))

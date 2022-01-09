@@ -17,9 +17,10 @@ if __name__ == '__main__':
     G.visualize()
 
     net = Network(G)
-    net.set_NPT_from_csv(node1, 'data/node1.csv')
-    net.set_NPT_from_csv(node2, 'data/node2.csv')
-    net.set_NPT_from_csv(node3, 'data/node3.csv')
+    net.help_generate_NPT([node1,node2,node3],'data/')
+    # net.set_NPT_from_csv(node1, 'data/node1.csv')
+    # net.set_NPT_from_csv(node2, 'data/node2.csv')
+    # net.set_NPT_from_csv(node3, 'data/node3.csv')
 
     # net.full_marginal({node1:True,node2:True, node3:True})
 
