@@ -56,9 +56,7 @@ class OR_Node(Boolean_Node):
         for node in self.get_parent():
             if not isinstance(node, Boolean_Node):
                 raise Exception
-
         par = self.get_parent()
-
         columns = [i.id_name for i in par] + [self.id_name, "cond_prob"]
         states = [i.states for i in par] + [self.states] + [[0]]
         map_states = list(itertools.product(*states))

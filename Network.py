@@ -3,20 +3,33 @@ from Graph import Graph
 import pandas as pd
 import itertools
 from prettytable import PrettyTable
-
+import networkx as nx
+from networkx import cycle_basis
+from Exception import NetworkException
 
 class Network:
     def __init__(self, graph: Graph):
         self.graph = graph
+        '''
+        check DAG
+        '''
+        if self.checkCycle(graph.edges):
+            raise NetworkException('the graph must be DAG !!!')
+
         self.num_nodes = graph.num_nodes
         self.list_nodes = self.graph.list_nodes
+
+
+    def checkCycle(self, edges):
+        di_graph = nx.DiGraph(edges)
+        if len(list(nx.simple_cycles(di_graph))) > 0:
+            return True
+        return False
 
     def help_generate_NPT(self, list_nodes, path_to_folder=None):
         for node in list_nodes:
             if node not in self.list_nodes:
-                print("Error: node ", node.id_name, " not in network")
-                raise Exception
-
+                raise NetworkException(f"Error: node {node.id_name} has not been added to the network")
 
         for node in list_nodes:
             par = node.get_parent()
@@ -27,19 +40,22 @@ class Network:
             if path_to_folder is not None:
                 zero_NPT_path = path_to_folder + '/' + node.id_name + '.csv'
                 df.to_csv(zero_NPT_path)
-                print("base NPT of " + node.id_name + " is stored in: " + zero_NPT_path)
+                print(f"base NPT of {node.id_name}  is stored in:  {zero_NPT_path}")
             else:
-                return df
+                raise NetworkException('path to folder is None')
 
     def set_NPT_from_csv(self, node: Node, path):
         if node not in self.graph.list_nodes:
-            print("Node is not available in network")
+            raise NetworkException(f"Error: node {node.id_name} has not been added to the network")
         else:
             node.set_NPT_from_csv(path)
 
     def set_NPT_func(self, func_node):
-        if func_node in self.list_nodes:
+        if func_node not in self.graph.list_nodes:
+            raise NetworkException(f"Error: node {func_node.id_name} has not been added to the network")
+        else:
             func_node.set_NPT_func()
+
 
     def set_NPT(self, node: Node, NPT):
         '''
@@ -56,7 +72,7 @@ class Network:
             ['high', 'true', 1]],columns = ['node1','node2', 'cond_prob'])
         '''
         if node not in self.graph.list_nodes:
-            print("Node is not available in network")
+            raise NetworkException(f"Error: node {node.id_name} has not been added to the network")
         else:
             columns = [i.id_name for i in node.get_parent()] + [node.id_name, "cond_prob"]
             node.NPT = NPT[columns]
@@ -64,7 +80,8 @@ class Network:
     def set_evidence(self, evidence: dict):
         for node in evidence.keys():
             if node not in self.list_nodes:
-                raise Exception
+                raise NetworkException(f"Error: node {node.id_name} has not been added to the network")
+
         print("******************************")
         print("set evidence", {i.id_name: j for i, j in evidence.items()})
         for node in self.list_nodes:
@@ -81,7 +98,7 @@ class Network:
         result = 1
         for node in observation.keys():
             if node not in self.list_nodes:
-                raise Exception
+                raise NetworkException(f"Error: node {node.id_name} has not been added to the network")
 
         for node in self.graph.list_nodes:
 
@@ -102,7 +119,7 @@ class Network:
 
     def marginal_probability(self, observation: dict):
         if self.num_nodes < len(observation):
-            print("Invalid input")
+            raise NetworkException(f"Invalid input")
         else:
             result = 0
 
@@ -123,6 +140,7 @@ class Network:
             return round(result, 5)
 
     def conditional_probability(self, observation: dict, conditional: dict):
+
         try:
             result = (self.marginal_probability({**observation, **conditional})) / (
                 self.marginal_probability(conditional))
