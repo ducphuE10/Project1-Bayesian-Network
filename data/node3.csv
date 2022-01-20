@@ -1,0 +1,5 @@
+,node2,node3,cond_prob
+0,True,True,0
+1,True,False,0
+2,False,True,0
+3,False,False,0

@@ -1,0 +1,5 @@
+,Encrypted_File,File_Decrypted,cond_prob
+0,True,True,0.05
+1,True,False,0.95
+2,False,True,0
+3,False,False,1

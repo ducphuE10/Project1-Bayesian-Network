@@ -3,6 +3,7 @@ import numpy as np
 import pandas as pd
 from scipy.stats import norm
 import seaborn as sns
+from Exception import NetworkException
 
 class Node:
     def __init__(self, id_name: str, states: list):
@@ -16,11 +17,15 @@ class Node:
         self.states = states
         self.N = len(states)
         self.NPT = None
+        self.isFunc = False
 
     def add_parent(self, node):
         self.num_parent += 1
         self.parent.append(node)
 
+    def remove_parent(self, node):
+        self.num_parent -= 1
+        self.parent.remove(node)
     def get_parent(self):
         '''
         :return: list of parent nodes
@@ -32,13 +37,11 @@ class Node:
         Set the value of node from csv file
         :param path: path to file
         '''
-        self.NPT = pd.read_csv(path)
+        self.NPT = pd.read_csv(path,index_col= 0)
 
     def set_NPT_func(self):
-        '''
-        for function node
-        '''
-        pass
+        raise NotImplementedError("Only function Node have this method !!!")
+
 
 
 
@@ -52,15 +55,18 @@ class OR_Node(Boolean_Node):
     def __init__(self, id_name):
         super().__init__(id_name)
         self.NPT = None
+        self.isFunc = True
+
     def set_NPT_func(self):
         for node in self.get_parent():
             if not isinstance(node, Boolean_Node):
-                raise Exception
+                raise NetworkException("the parent of OR_Node must be Boolean Node !!!")
+
         par = self.get_parent()
         columns = [i.id_name for i in par] + [self.id_name, "cond_prob"]
         states = [i.states for i in par] + [self.states] + [[0]]
         map_states = list(itertools.product(*states))
-        # print(map_states)
+
         baseNPT = [list(record) for record in map_states]
         for record in baseNPT:
             if (True in record[:-2] and record[-2] == True) or (True not in record[:-2] and record[-2] == False):
@@ -72,10 +78,11 @@ class AND_Node(Boolean_Node):
     def __init__(self, id_name):
         super().__init__(id_name)
         self.NPT = None
+        self.isFunc = True
     def set_NPT_func(self):
         for node in self.get_parent():
             if not isinstance(node, Boolean_Node):
-                raise Exception
+                raise NetworkException("the parent of OR_Node must be Boolean Node !!!")
 
         par = self.get_parent()
         columns = [i.id_name for i in par] + [self.id_name, "cond_prob"]
@@ -94,13 +101,14 @@ class MtoN_Node(Boolean_Node):
         super().__init__(id_name)
         self.NPT = None
         self.M = M #
-
+        self.isFunc = True
     def set_NPT_func(self):
         if self.M > self.num_parent:
             raise Exception
+
         for node in self.get_parent():
             if not isinstance(node, Boolean_Node):
-                raise Exception
+                raise NetworkException("the parent of OR_Node must be Boolean Node !!!")
 
         par = self.get_parent()
         columns = [i.id_name for i in par] + [self.id_name, "cond_prob"]
@@ -113,14 +121,39 @@ class MtoN_Node(Boolean_Node):
 
         self.NPT = pd.DataFrame(baseNPT, columns=columns)
 
+
+class XOR_Node(Boolean_Node):
+    def __init__(self, id_name):
+        super().__init__(id_name)
+        self.NPT = None
+        self.isFunc = True
+    def set_NPT_func(self):
+
+        for node in self.get_parent():
+            if not isinstance(node, Boolean_Node):
+                raise NetworkException("the parent of OR_Node must be Boolean Node !!!")
+
+        par = self.get_parent()
+        columns = [i.id_name for i in par] + [self.id_name, "cond_prob"]
+        states = [i.states for i in par] + [self.states] + [[0]]
+        map_states = list(itertools.product(*states))
+        baseNPT = [list(record) for record in map_states]
+        for record in baseNPT:
+            if (sum(record[:-2]) %2 == 1 and record[-2] == True) or (sum(record[:-2]) %2 == 0 and record[-2] == False):
+                record[-1] = 1
+
+        self.NPT = pd.DataFrame(baseNPT, columns=columns)
+
+
+
 class Label_Node(Node):
     def __init__(self, id_name, states: list):
         super().__init__(id_name, states)
 
+
 class Ranked_Node(Node):
     def __init__(self, id_name, states: list, mean = 0, std = 1):
         super().__init__(id_name, states)
-
         self.numeric_states = np.linspace(0.0,1.0,len(states)+1)
         self.NPT = None
         self.mean = mean
@@ -130,15 +163,12 @@ class Ranked_Node(Node):
 
 
     def set_NPT_func(self):
-
         y = []
         for i in range(len(self.numeric_states) - 1):
             y.append(self.gaussian.cdf(self.numeric_states[i + 1]) - self.gaussian.cdf(self.numeric_states[i]))
-
         prob = [i * 1 / sum(y) for i in y]
         columns = [self.id_name, "cond_prob"]
         baseNPT = (list(zip(self.states, prob)))
-
         self.NPT = pd.DataFrame(baseNPT, columns=columns)
 
 class Weighted_Node(Ranked_Node):
@@ -147,12 +177,15 @@ class Weighted_Node(Ranked_Node):
         self.numeric_states = np.linspace(0.0, 1.0, len(states) + 1)
         self.weighted_mean = weighted_mean
         self.map = dict(zip(self.states,self.numeric_states[:-1]))
+        self.isFunc = True
 
     def set_NPT_func(self):
         assert len(self.weighted_mean) == len(self.get_parent())
         for node in self.get_parent():
             if not isinstance(node, Ranked_Node):
-                raise Exception
+                raise NetworkException("the parent of Weighted_Node must be Ranked Node !!!")
+            if node not in self.weighted_mean.keys():
+                raise NetworkException("Insufficient for parent node")
 
         par = self.weighted_mean.keys()
         columns = [i.id_name for i in par] + [self.id_name, "cond_prob"]
@@ -163,17 +196,15 @@ class Weighted_Node(Ranked_Node):
         baseNPT = []
         for record in map_states:
             mean = self.get_mean_from_par_state(record)
-
             y = []
             gaussian = norm(mean, self.std)
             for i in range(len(self.numeric_states) - 1):
                 y.append(gaussian.cdf(self.numeric_states[i + 1]) - gaussian.cdf(self.numeric_states[i]))
 
-            prob = [round(i * 1 / sum(y),3) for i in y]
+            prob = [round(i * 1 / (sum(y) + 1e-5),3) for i in y]
             state_prob = list(zip(self.states, prob))
             for i in state_prob:
                baseNPT.append(record + list(i))
-
         self.NPT = pd.DataFrame(baseNPT, columns=columns)
 
 

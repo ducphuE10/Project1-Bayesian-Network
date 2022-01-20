@@ -6,6 +6,7 @@ from prettytable import PrettyTable
 import networkx as nx
 from networkx import cycle_basis
 from Exception import NetworkException
+from tabulate import tabulate
 
 class Network:
     def __init__(self, graph: Graph):
@@ -20,6 +21,18 @@ class Network:
         self.list_nodes = self.graph.list_nodes
 
 
+    def checkValidNPT(self, node):
+        npt = node.NPT
+        id_name_par = [i.id_name for i in node.parent]
+        print(npt)
+        if len(id_name_par) > 0:
+            list_prob = npt.groupby(id_name_par)['cond_prob'].sum().tolist()
+            if not (all(i==1 for i in list_prob)):
+                raise NetworkException(f'invalid NPT for node: {node.id_name}')
+        else:
+            if npt['cond_prob'].sum() != 1:
+                raise NetworkException(f'invalid NPT for node: {node.id_name}')
+
     def checkCycle(self, edges):
         di_graph = nx.DiGraph(edges)
         if len(list(nx.simple_cycles(di_graph))) > 0:
@@ -32,6 +45,10 @@ class Network:
                 raise NetworkException(f"Error: node {node.id_name} has not been added to the network")
 
         for node in list_nodes:
+            if node.isFunc == True:
+                print('function nodes do not need to create NPT manually: ',node.id_name)
+                continue
+
             par = node.get_parent()
             columns = [i.id_name for i in par] + [node.id_name, "cond_prob"]
             states = [i.states for i in par] + [node.states] + [[0]]
@@ -48,7 +65,11 @@ class Network:
         if node not in self.graph.list_nodes:
             raise NetworkException(f"Error: node {node.id_name} has not been added to the network")
         else:
-            node.set_NPT_from_csv(path)
+            if node.isFunc == True:
+                print('function nodes do not need to create NPT manually: ',node.id_name)
+            else:
+                node.set_NPT_from_csv(path)
+                self.checkValidNPT(node)
 
     def set_NPT_func(self, func_node):
         if func_node not in self.graph.list_nodes:
@@ -83,7 +104,7 @@ class Network:
                 raise NetworkException(f"Error: node {node.id_name} has not been added to the network")
 
         print("******************************")
-        print("set evidence", {i.id_name: j for i, j in evidence.items()})
+        print("set evidence ", {i.id_name: j for i, j in evidence.items()})
         for node in self.list_nodes:
             if node not in evidence.keys():
                 table = PrettyTable(['state', 'prob'])
@@ -101,20 +122,14 @@ class Network:
                 raise NetworkException(f"Error: node {node.id_name} has not been added to the network")
 
         for node in self.graph.list_nodes:
-
-            # if node.name == 'node4':
             par = node.get_parent()
-
             npt = node.NPT
-
             node_value = observation[node]
             npt = npt[npt[node.id_name] == node_value]
             for p in par:
                 node_value = observation[p]
                 npt = npt[npt[p.id_name] == node_value]
-
             result *= npt['cond_prob'].values.item()
-
         return round(result, 5)
 
     def marginal_probability(self, observation: dict):
@@ -122,19 +137,15 @@ class Network:
             raise NetworkException(f"Invalid input")
         else:
             result = 0
-
             hidden_nodes = [i for i in self.graph.list_nodes if i not in observation]
-            # print(hidden_nodes)
             list_hidden_node_states = []
             for node in hidden_nodes:
                 list_hidden_node_states.append(node.states)
-
             map_hidden_states = list(itertools.product(*list_hidden_node_states))
-            # print(map_hidden_states)
+
             for values in map_hidden_states:
                 hidden_dict = {hidden_nodes[i]: values[i] for i in range(len(values))}
                 full_observation = {**observation, **hidden_dict}
-                # print(self.full_marginal(full_observation))
                 result += self.full_marginal(full_observation)
 
             return round(result, 5)
@@ -153,8 +164,12 @@ class Network:
         print("Initial states")
         for node in self.list_nodes:
             table = PrettyTable(['state', 'prob'])
-            for state in node.states:
-                table.add_row([state, self.marginal_probability({node: state})])
+            if node.num_parent > 0:
+                for state in node.states:
+                    table.add_row([state, self.marginal_probability({node: state})])
+            else:
+                table = tabulate(node.NPT, headers=['state','prob'], tablefmt='psql',showindex=False)
+
             print("Table of node: ", node.id_name)
             print(table)
         print("******************************\n")
