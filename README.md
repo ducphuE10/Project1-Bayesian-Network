@@ -18,5 +18,5 @@ pip install -r requirements.txt
   * Generate NPT for all nodes before calculate
   * You can calculate marginal probability, conditional probability, set evidence, view initial states
   
-  detail in tutorial.pynb
+  Detail in tutorial.pynb
 
